@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
+import QurateLogo from '@/components/QurateLogo';
 import AccessDenied from './AccessDenied';
 
 export default function Calculator() {
@@ -78,11 +79,9 @@ export default function Calculator() {
     <div className="min-h-screen bg-qurate-slate">
       {/* Header */}
       <header className="border-b border-qurate-slate-light/20">
-        <div className="container mx-auto px-4 py-6">
-          <h1 className="text-2xl font-semibold text-qurate-light tracking-tight">
-            Qurate Advisory
-          </h1>
-          <p className="text-qurate-muted text-sm mt-1">Fee Calculator</p>
+        <div className="container mx-auto px-4 py-5 flex items-center justify-between">
+          <QurateLogo />
+          <span className="text-qurate-muted text-sm">Fee Calculator</span>
         </div>
       </header>
 
@@ -245,15 +244,25 @@ export default function Calculator() {
         </Card>
 
         {/* Footer */}
-        <footer className="mt-8 text-center text-qurate-muted text-sm">
+        <footer className="mt-8 text-center text-qurate-muted text-sm space-y-2">
           <p>This is an estimate only. Final fees may vary based on engagement terms.</p>
-          <p className="mt-1">
+          <p>
             Contact us at{' '}
             <a 
               href="mailto:info@qurate.com.au" 
               className="text-qurate-gold hover:underline"
             >
               info@qurate.com.au
+            </a>
+          </p>
+          <p className="pt-4">
+            <a 
+              href="https://www.qurate.com.au" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-qurate-gold hover:underline"
+            >
+              www.qurate.com.au
             </a>
           </p>
         </footer>

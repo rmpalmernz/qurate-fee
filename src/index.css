@@ -48,13 +48,13 @@ Qurate Brand Colors: Dark slate (#334155), Gold accents
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
 
-    /* Qurate Brand Colors */
-    --qurate-slate: 215 25% 27%;
-    --qurate-slate-light: 215 20% 35%;
-    --qurate-gold: 45 93% 47%;
-    --qurate-gold-light: 45 93% 55%;
+    /* Qurate Brand Colors - matched to qurate.com.au */
+    --qurate-slate: 213 23% 23%;
+    --qurate-slate-light: 213 20% 30%;
+    --qurate-gold: 43 90% 50%;
+    --qurate-gold-light: 43 90% 58%;
     --qurate-light: 210 40% 98%;
-    --qurate-muted: 215 20% 65%;
+    --qurate-muted: 213 15% 60%;
   }
 
   .dark {
