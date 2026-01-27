@@ -1,4 +1,4 @@
-import qurateLogo from '@/assets/qurate-logo-gold.png';
+import qurateLogo from '@/assets/qurate-logo-white.svg';
 
 interface QurateLogoProps {
   className?: string;
