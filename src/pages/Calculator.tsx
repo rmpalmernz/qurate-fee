@@ -16,9 +16,17 @@ export default function Calculator() {
   const [inputValue, setInputValue] = useState('');
   const [enterpriseValue, setEnterpriseValue] = useState(0);
 
-  // Validate token on mount
+  // Validate token on mount (bypass in dev mode with ?dev=true)
   useEffect(() => {
     const token = searchParams.get('token');
+    const devMode = searchParams.get('dev') === 'true';
+    
+    // Allow access in dev mode without token
+    if (devMode) {
+      setIsValidating(false);
+      return;
+    }
+    
     const result = validateToken(token);
     
     if (!result.valid) {
