@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, forwardRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { validateToken } from '@/lib/tokenUtils';
 import { calculateFees, formatCurrency, parseCurrencyInput } from '@/lib/feeCalculations';
@@ -10,7 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import PageShell from '@/components/layout/PageShell';
 import AccessDenied from './AccessDenied';
 
-const Calculator = forwardRef<HTMLDivElement>((_, ref) => {
+export default function Calculator() {
   const [searchParams] = useSearchParams();
   const [isValidating, setIsValidating] = useState(true);
   const [tokenError, setTokenError] = useState<string | null>(null);
@@ -62,18 +62,18 @@ const Calculator = forwardRef<HTMLDivElement>((_, ref) => {
 
   if (isValidating) {
     return (
-      <div ref={ref} className="min-h-screen bg-qurate-slate flex items-center justify-center">
+      <div className="min-h-screen bg-qurate-slate flex items-center justify-center">
         <div className="text-qurate-light animate-pulse">Validating access...</div>
       </div>
     );
   }
 
   if (tokenError) {
-    return <div ref={ref}><AccessDenied error={tokenError} /></div>;
+    return <AccessDenied error={tokenError} />;
   }
 
   return (
-    <PageShell ref={ref}>
+    <PageShell>
       {/* Hero Section with Strapline */}
       <section className="container mx-auto px-4 py-12 max-w-4xl">
         <h1 className="text-qurate-light text-2xl md:text-3xl lg:text-4xl font-bold leading-tight mb-6">
@@ -257,8 +257,4 @@ const Calculator = forwardRef<HTMLDivElement>((_, ref) => {
       </section>
     </PageShell>
   );
-});
-
-Calculator.displayName = 'Calculator';
-
-export default Calculator;
+}
