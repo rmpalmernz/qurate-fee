@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { validateToken } from '@/lib/tokenUtils';
-import { calculateFees, formatCurrency, parseCurrencyInput, FEE_REFERENCE_TABLE } from '@/lib/feeCalculations';
+import { calculateFees, formatCurrency, parseCurrencyInput } from '@/lib/feeCalculations';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -38,7 +38,7 @@ export default function Calculator() {
 
   // Calculate fees when enterprise value changes
   const feeResult = useMemo(() => {
-    if (enterpriseValue < 5_000_000) return null;
+    if (enterpriseValue < 2_000_000) return null;
     return calculateFees(enterpriseValue);
   }, [enterpriseValue]);
 
@@ -131,9 +131,9 @@ export default function Calculator() {
                   className="pl-8 bg-qurate-slate border-qurate-slate-light/50 text-qurate-light placeholder:text-qurate-muted/50 focus:border-qurate-gold focus:ring-qurate-gold text-lg h-12"
                 />
               </div>
-              {enterpriseValue > 0 && enterpriseValue < 5_000_000 && (
+              {enterpriseValue > 0 && enterpriseValue < 2_000_000 && (
                 <p className="text-sm text-amber-400">
-                  Minimum Enterprise Value is $5,000,000
+                  Minimum Enterprise Value is $2,000,000
                 </p>
               )}
             </div>
@@ -145,27 +145,37 @@ export default function Calculator() {
                 
                 <div className="space-y-4">
                   <h3 className="text-qurate-light font-semibold text-lg">
-                    Fee Breakdown
+                    Success Fee Breakdown
                   </h3>
                   
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    {/* Prepare Phase */}
+                  <div className="grid gap-4 sm:grid-cols-3">
+                    {/* Terms Agreed */}
                     <div className="bg-qurate-slate rounded-lg p-4 border border-qurate-slate-light/20">
                       <p className="text-qurate-muted text-sm uppercase tracking-wide">
-                        Prepare Phase
+                        Terms Agreed
                       </p>
                       <p className="text-qurate-gold text-2xl font-bold mt-1">
-                        {formatCurrency(feeResult.prepareFee)}
+                        {formatCurrency(feeResult.termsAgreedFee)}
                       </p>
                     </div>
 
-                    {/* Execute Phase */}
+                    {/* Completion Fee */}
                     <div className="bg-qurate-slate rounded-lg p-4 border border-qurate-slate-light/20">
                       <p className="text-qurate-muted text-sm uppercase tracking-wide">
-                        Execute Phase
+                        Completion Fee
                       </p>
                       <p className="text-qurate-gold text-2xl font-bold mt-1">
-                        {formatCurrency(feeResult.executeFee)}
+                        {formatCurrency(feeResult.completionFee)}
+                      </p>
+                    </div>
+
+                    {/* Sliding Scale */}
+                    <div className="bg-qurate-slate rounded-lg p-4 border border-qurate-slate-light/20">
+                      <p className="text-qurate-muted text-sm uppercase tracking-wide">
+                        Sliding Scale
+                      </p>
+                      <p className="text-qurate-gold text-2xl font-bold mt-1">
+                        {formatCurrency(feeResult.slidingScaleFee)}
                       </p>
                     </div>
                   </div>
@@ -175,10 +185,10 @@ export default function Calculator() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-qurate-muted text-sm uppercase tracking-wide">
-                          Total Fees
+                          Total Success Fee
                         </p>
                         <p className="text-qurate-gold text-3xl font-bold mt-1">
-                          {formatCurrency(feeResult.totalFee)}
+                          {formatCurrency(feeResult.totalSuccessFee)}
                         </p>
                       </div>
                       <div className="text-right">
@@ -192,7 +202,7 @@ export default function Calculator() {
                     </div>
                   </div>
 
-            {enterpriseValue > 50_000_000 && (
+                  {enterpriseValue > 50_000_000 && (
                     <p className="text-sm text-qurate-muted italic">
                       * Fees are capped at the $50M rate for Enterprise Values above $50,000,000
                     </p>
@@ -220,36 +230,37 @@ export default function Calculator() {
               <Table>
                 <TableHeader>
                   <TableRow className="border-qurate-slate-light/30 hover:bg-transparent">
-                    <TableHead className="text-qurate-muted">Enterprise Value</TableHead>
-                    <TableHead className="text-qurate-muted text-right">Prepare</TableHead>
-                    <TableHead className="text-qurate-muted text-right">Execute</TableHead>
-                    <TableHead className="text-qurate-muted text-right">Total</TableHead>
-                    <TableHead className="text-qurate-muted text-right">% of EV</TableHead>
+                    <TableHead className="text-qurate-muted">Band</TableHead>
+                    <TableHead className="text-qurate-muted text-right">Terms Agreed</TableHead>
+                    <TableHead className="text-qurate-muted text-right">Completion Fee</TableHead>
+                    <TableHead className="text-qurate-muted text-right">Sliding Scale</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {FEE_REFERENCE_TABLE.map((tier, index) => (
-                    <TableRow 
-                      key={tier.ev}
-                      className="border-qurate-slate-light/20 hover:bg-qurate-slate/50"
-                    >
-                      <TableCell className="text-qurate-light font-medium">
-                        {formatCurrency(tier.ev)}{index === FEE_REFERENCE_TABLE.length - 1 ? '+' : ''}
-                      </TableCell>
-                      <TableCell className="text-qurate-light text-right">
-                        {formatCurrency(tier.prepare)}
-                      </TableCell>
-                      <TableCell className="text-qurate-light text-right">
-                        {formatCurrency(tier.execute)}
-                      </TableCell>
-                      <TableCell className="text-qurate-gold text-right font-semibold">
-                        {formatCurrency(tier.total)}
-                      </TableCell>
-                      <TableCell className="text-qurate-light text-right">
-                        {tier.percentage.toFixed(2)}%
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  <TableRow className="border-qurate-slate-light/20 hover:bg-qurate-slate/50">
+                    <TableCell className="text-qurate-light font-medium">$2M to $5M</TableCell>
+                    <TableCell className="text-qurate-light text-right">{formatCurrency(20_000)}</TableCell>
+                    <TableCell className="text-qurate-light text-right">{formatCurrency(125_000)}</TableCell>
+                    <TableCell className="text-qurate-gold text-right font-semibold">3.50%</TableCell>
+                  </TableRow>
+                  <TableRow className="border-qurate-slate-light/20 hover:bg-qurate-slate/50">
+                    <TableCell className="text-qurate-light font-medium">$5M to $10M</TableCell>
+                    <TableCell className="text-qurate-light text-right">{formatCurrency(30_000)}</TableCell>
+                    <TableCell className="text-qurate-light text-right">{formatCurrency(270_000)}</TableCell>
+                    <TableCell className="text-qurate-gold text-right font-semibold">2.50%</TableCell>
+                  </TableRow>
+                  <TableRow className="border-qurate-slate-light/20 hover:bg-qurate-slate/50">
+                    <TableCell className="text-qurate-light font-medium">$10M to $20M</TableCell>
+                    <TableCell className="text-qurate-light text-right">{formatCurrency(35_000)}</TableCell>
+                    <TableCell className="text-qurate-light text-right">{formatCurrency(400_000)}</TableCell>
+                    <TableCell className="text-qurate-gold text-right font-semibold">2.50%</TableCell>
+                  </TableRow>
+                  <TableRow className="border-qurate-slate-light/20 hover:bg-qurate-slate/50">
+                    <TableCell className="text-qurate-light font-medium">$20M to $50M</TableCell>
+                    <TableCell className="text-qurate-light text-right">{formatCurrency(50_000)}</TableCell>
+                    <TableCell className="text-qurate-light text-right">{formatCurrency(600_000)}</TableCell>
+                    <TableCell className="text-qurate-gold text-right font-semibold">1.50%</TableCell>
+                  </TableRow>
                 </TableBody>
               </Table>
             </div>

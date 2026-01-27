@@ -1,102 +1,107 @@
-// Fee calculation logic based on Qurate's sliding scale model
+// Fee calculation logic based on Qurate's tiered fee structure
+// Total Fee = Retainer + Success Fee
+// Success Fee = Terms Agreed + Completion Fee + Sliding Scale
 
-interface FeeTier {
-  ev: number;
-  prepare: number;
-  execute: number;
+interface FeeBand {
+  minEV: number;
+  maxEV: number;
+  termsAgreed: number;      // Fixed fee when terms agreed
+  completionFee: number;    // Fixed completion fee
+  slidingScaleRate: number; // Percentage for sliding scale (cumulative)
 }
 
-// Fee tiers from the model (in dollars)
-const FEE_TIERS: FeeTier[] = [
-  { ev: 5_000_000, prepare: 50_000, execute: 250_000 },
-  { ev: 10_000_000, prepare: 75_000, execute: 425_000 },
-  { ev: 20_000_000, prepare: 75_000, execute: 685_000 },
-  { ev: 30_000_000, prepare: 75_000, execute: 1_070_000 },
-  { ev: 40_000_000, prepare: 75_000, execute: 1_220_000 },
-  { ev: 50_000_000, prepare: 75_000, execute: 1_370_000 },
+// Fee bands with cumulative sliding scale
+const FEE_BANDS: FeeBand[] = [
+  { minEV: 2_000_000, maxEV: 5_000_000, termsAgreed: 20_000, completionFee: 125_000, slidingScaleRate: 0.035 },
+  { minEV: 5_000_000, maxEV: 10_000_000, termsAgreed: 30_000, completionFee: 270_000, slidingScaleRate: 0.025 },
+  { minEV: 10_000_000, maxEV: 20_000_000, termsAgreed: 35_000, completionFee: 400_000, slidingScaleRate: 0.025 },
+  { minEV: 20_000_000, maxEV: 50_000_000, termsAgreed: 50_000, completionFee: 600_000, slidingScaleRate: 0.015 },
 ];
 
 export interface FeeResult {
   enterpriseValue: number;
-  prepareFee: number;
-  executeFee: number;
-  totalFee: number;
+  termsAgreedFee: number;
+  completionFee: number;
+  slidingScaleFee: number;
+  totalSuccessFee: number;
   percentageOfEV: number;
+  breakdown: BandBreakdown[];
 }
 
-function interpolate(
-  value: number,
-  x1: number,
-  x2: number,
-  y1: number,
-  y2: number
-): number {
-  if (x1 === x2) return y1;
-  return y1 + ((value - x1) * (y2 - y1)) / (x2 - x1);
+export interface BandBreakdown {
+  band: string;
+  evInBand: number;
+  termsAgreed: number;
+  completionFee: number;
+  slidingScale: number;
 }
 
 export function calculateFees(enterpriseValue: number): FeeResult | null {
-  if (enterpriseValue < 5_000_000) {
-    return null; // Below minimum threshold
+  // Minimum EV is $2M
+  if (enterpriseValue < 2_000_000) {
+    return null;
   }
 
-  // Cap at $50M rate for values above
+  // Cap at $50M
   const cappedEV = Math.min(enterpriseValue, 50_000_000);
-  
-  let prepareFee: number;
-  let executeFee: number;
 
-  // Find the appropriate tier or interpolate
-  if (cappedEV >= 50_000_000) {
-    // At or above max tier - use max tier rates
-    prepareFee = FEE_TIERS[5].prepare;
-    executeFee = FEE_TIERS[5].execute;
-  } else {
-    // Find the tier range and interpolate
-    let lowerTier = FEE_TIERS[0];
-    let upperTier = FEE_TIERS[0];
+  let totalTermsAgreed = 0;
+  let totalCompletionFee = 0;
+  let totalSlidingScale = 0;
+  const breakdown: BandBreakdown[] = [];
 
-    for (let i = 0; i < FEE_TIERS.length - 1; i++) {
-      if (cappedEV >= FEE_TIERS[i].ev && cappedEV < FEE_TIERS[i + 1].ev) {
-        lowerTier = FEE_TIERS[i];
-        upperTier = FEE_TIERS[i + 1];
-        break;
-      }
+  for (const band of FEE_BANDS) {
+    // Check if EV reaches this band
+    if (cappedEV <= band.minEV) {
+      break;
     }
 
-    // Interpolate prepare fee (with special handling for $5M tier)
-    if (cappedEV <= 10_000_000) {
-      prepareFee = interpolate(
-        cappedEV,
-        FEE_TIERS[0].ev,
-        FEE_TIERS[1].ev,
-        FEE_TIERS[0].prepare,
-        FEE_TIERS[1].prepare
-      );
-    } else {
-      // Prepare fee is flat $75k above $10M
-      prepareFee = 75_000;
-    }
+    // Calculate how much EV falls within this band
+    const evInBand = Math.min(cappedEV, band.maxEV) - band.minEV;
+    
+    if (evInBand <= 0) continue;
 
-    // Interpolate execute fee
-    executeFee = interpolate(
-      cappedEV,
-      lowerTier.ev,
-      upperTier.ev,
-      lowerTier.execute,
-      upperTier.execute
-    );
+    // Calculate sliding scale for this band
+    const slidingScale = evInBand * band.slidingScaleRate;
+
+    // Determine if this is the highest band reached
+    const isHighestBand = cappedEV <= band.maxEV;
+
+    // Add fixed fees (only for the highest band reached, or accumulate - let me check)
+    // Based on the table, fees seem to be for the band you're IN
+    // For $25M, only the $20-50M band shows the fixed fees
+    
+    // Actually, looking at the table for $25M EV, only $20-50M row shows $25M
+    // This suggests only the current band's fixed fees apply
+    
+    // Let me implement as: fixed fees apply only for the highest band
+    const termsAgreed = isHighestBand ? band.termsAgreed : 0;
+    const completionFee = isHighestBand ? band.completionFee : 0;
+
+    totalTermsAgreed += termsAgreed;
+    totalCompletionFee += completionFee;
+    totalSlidingScale += slidingScale;
+
+    breakdown.push({
+      band: `$${(band.minEV / 1_000_000).toFixed(0)}M to $${(band.maxEV / 1_000_000).toFixed(0)}M`,
+      evInBand,
+      termsAgreed,
+      completionFee,
+      slidingScale: Math.round(slidingScale),
+    });
   }
 
-  const totalFee = prepareFee + executeFee;
-  const percentageOfEV = (totalFee / enterpriseValue) * 100;
+  const totalSuccessFee = totalTermsAgreed + totalCompletionFee + totalSlidingScale;
+  const percentageOfEV = (totalSuccessFee / enterpriseValue) * 100;
 
   return {
     enterpriseValue,
-    prepareFee: Math.round(prepareFee),
-    executeFee: Math.round(executeFee),
-    totalFee: Math.round(totalFee),
+    termsAgreedFee: Math.round(totalTermsAgreed),
+    completionFee: Math.round(totalCompletionFee),
+    slidingScaleFee: Math.round(totalSlidingScale),
+    totalSuccessFee: Math.round(totalSuccessFee),
     percentageOfEV: Math.round(percentageOfEV * 100) / 100,
+    breakdown,
   };
 }
 
@@ -115,11 +120,10 @@ export function parseCurrencyInput(value: string): number {
   return parseFloat(cleaned) || 0;
 }
 
-// Reference table for display
-export const FEE_REFERENCE_TABLE = FEE_TIERS.map((tier) => ({
-  ev: tier.ev,
-  prepare: tier.prepare,
-  execute: tier.execute,
-  total: tier.prepare + tier.execute,
-  percentage: ((tier.prepare + tier.execute) / tier.ev) * 100,
-}));
+// Reference table for display showing max fees at each tier
+export const FEE_REFERENCE_TABLE = [
+  { ev: 5_000_000, termsAgreed: 20_000, completionFee: 125_000, rate: '3.50%' },
+  { ev: 10_000_000, termsAgreed: 30_000, completionFee: 270_000, rate: '2.50%' },
+  { ev: 20_000_000, termsAgreed: 35_000, completionFee: 400_000, rate: '2.50%' },
+  { ev: 50_000_000, termsAgreed: 50_000, completionFee: 600_000, rate: '1.50%' },
+];
