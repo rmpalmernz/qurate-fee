@@ -57,6 +57,15 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // Qurate Brand Colors
+        qurate: {
+          slate: "hsl(var(--qurate-slate))",
+          "slate-light": "hsl(var(--qurate-slate-light))",
+          gold: "hsl(var(--qurate-gold))",
+          "gold-light": "hsl(var(--qurate-gold-light))",
+          light: "hsl(var(--qurate-light))",
+          muted: "hsl(var(--qurate-muted))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
