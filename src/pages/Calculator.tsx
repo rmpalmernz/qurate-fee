@@ -86,12 +86,12 @@ export default function Calculator() {
 
       {/* Hero Section with Strapline */}
       <section className="container mx-auto px-4 py-12 max-w-4xl">
-        <h1 className="text-white text-4xl md:text-5xl lg:text-6xl font-serif italic leading-tight mb-6">
+        <h1 className="text-white text-4xl md:text-5xl lg:text-6xl font-light leading-tight mb-6">
           Business advice you<br />
           can count on.<br />
           People you can trust.
         </h1>
-        <p className="text-qurate-muted text-lg md:text-xl max-w-2xl">
+        <p className="text-qurate-muted text-lg md:text-xl max-w-2xl font-light">
           Your experienced corporate finance and strategic business transaction advisory team.
         </p>
       </section>

@@ -1,98 +1,111 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
-Qurate Brand Colors: Dark slate (#334155), Gold accents
+Qurate Brand Guidelines 2025:
+- Blue: #2E3D49 (primary slate)
+- Gold: #C19131 (accent)
+- Beige: #D9D2BE (secondary)
+- Typography: Helvetica Light (using Source Sans 3 as web alternative)
 */
 
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 207 23% 23%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 207 23% 23%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 207 23% 23%;
 
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 207 23% 23%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 42 14% 80%;
+    --secondary-foreground: 207 23% 23%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 42 14% 80%;
+    --muted-foreground: 207 15% 50%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 42 14% 80%;
+    --accent-foreground: 207 23% 23%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 42 14% 80%;
+    --input: 42 14% 80%;
+    --ring: 207 23% 23%;
 
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-foreground: 207 23% 23%;
+    --sidebar-primary: 207 23% 23%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 42 14% 80%;
+    --sidebar-accent-foreground: 207 23% 23%;
+    --sidebar-border: 42 14% 80%;
+    --sidebar-ring: 39 60% 47%;
 
-    /* Qurate Brand Colors - matched to qurate.com.au */
-    --qurate-slate: 213 23% 23%;
-    --qurate-slate-light: 213 20% 30%;
-    --qurate-gold: 43 90% 50%;
-    --qurate-gold-light: 43 90% 58%;
-    --qurate-light: 210 40% 98%;
-    --qurate-muted: 213 15% 60%;
+    /* Qurate Brand Colors - from Brand Guidelines 2025 */
+    /* Blue: #2E3D49 */
+    --qurate-slate: 207 23% 23%;
+    /* Slightly lighter for cards */
+    --qurate-slate-light: 207 20% 30%;
+    /* Gold: #C19131 */
+    --qurate-gold: 39 60% 47%;
+    --qurate-gold-light: 39 60% 55%;
+    /* Light text */
+    --qurate-light: 0 0% 100%;
+    /* Muted text */
+    --qurate-muted: 207 15% 65%;
+    /* Beige: #D9D2BE */
+    --qurate-beige: 42 29% 79%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 207 23% 23%;
+    --foreground: 0 0% 100%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 207 20% 30%;
+    --card-foreground: 0 0% 100%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 207 20% 30%;
+    --popover-foreground: 0 0% 100%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 207 23% 23%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 207 20% 35%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 207 20% 35%;
+    --muted-foreground: 207 15% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 207 20% 35%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --border: 207 20% 35%;
+    --input: 207 20% 35%;
+    --ring: 39 60% 47%;
+    --sidebar-background: 207 23% 23%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 39 60% 47%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 207 20% 30%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 207 20% 30%;
+    --sidebar-ring: 39 60% 47%;
   }
 }
 
@@ -103,5 +116,12 @@ Qurate Brand Colors: Dark slate (#334155), Gold accents
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 300;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 400;
   }
 }
