@@ -91,7 +91,7 @@ export default function Calculator() {
           can count on.<br />
           People you can trust.
         </h1>
-        <p className="text-qurate-muted text-lg md:text-xl font-light whitespace-nowrap">
+        <p className="text-qurate-muted text-base sm:text-lg md:text-xl font-light">
           Your experienced corporate finance and strategic business transaction advisory team.
         </p>
       </section>
