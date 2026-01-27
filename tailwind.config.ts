@@ -65,6 +65,8 @@ export default {
           "gold-light": "hsl(var(--qurate-gold-light))",
           light: "hsl(var(--qurate-light))",
           muted: "hsl(var(--qurate-muted))",
+          warning: "hsl(var(--qurate-warning))",
+          error: "hsl(var(--qurate-error))",
         },
       },
       borderRadius: {

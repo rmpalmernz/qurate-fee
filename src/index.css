@@ -68,6 +68,9 @@ Qurate Brand Guidelines 2025:
     --qurate-muted: 207 15% 65%;
     /* Beige: #D9D2BE */
     --qurate-beige: 42 29% 79%;
+    /* Semantic status colors */
+    --qurate-warning: 38 92% 50%;
+    --qurate-error: 0 72% 51%;
   }
 
   .dark {

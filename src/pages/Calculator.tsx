@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
-import QurateLogo from '@/components/QurateLogo';
+import PageShell from '@/components/layout/PageShell';
 import AccessDenied from './AccessDenied';
 
 const Calculator = forwardRef<HTMLDivElement>((_, ref) => {
@@ -47,16 +47,19 @@ const Calculator = forwardRef<HTMLDivElement>((_, ref) => {
     const numericValue = parseCurrencyInput(rawValue);
     setEnterpriseValue(numericValue);
   };
+
   const handleInputBlur = () => {
     if (enterpriseValue > 0) {
       setInputValue(formatCurrency(enterpriseValue).replace('A$', ''));
     }
   };
+
   const handleInputFocus = () => {
     if (enterpriseValue > 0) {
       setInputValue(enterpriseValue.toString());
     }
   };
+
   if (isValidating) {
     return (
       <div ref={ref} className="min-h-screen bg-qurate-slate flex items-center justify-center">
@@ -64,37 +67,31 @@ const Calculator = forwardRef<HTMLDivElement>((_, ref) => {
       </div>
     );
   }
+
   if (tokenError) {
     return <div ref={ref}><AccessDenied error={tokenError} /></div>;
   }
 
   return (
-    <div ref={ref} className="min-h-screen bg-qurate-slate">
-      {/* Header */}
-      <header className="border-b border-qurate-slate-light/20">
-        <div className="container mx-auto px-4 py-5 flex items-center justify-between">
-          <QurateLogo />
-        </div>
-      </header>
-
+    <PageShell ref={ref}>
       {/* Hero Section with Strapline */}
       <section className="container mx-auto px-4 py-12 max-w-4xl">
-        <h1 className="text-white text-2xl md:text-3xl lg:text-4xl font-bold leading-tight mb-6">
+        <h1 className="text-qurate-light text-2xl md:text-3xl lg:text-4xl font-bold leading-tight mb-6">
           Business advice you<br />
           can count on.<br />
           People you can trust.
         </h1>
-        <p className="text-qurate-muted text-lg md:text-xl font-light whitespace-nowrap">
+        <p className="text-qurate-muted text-base sm:text-lg md:text-xl font-light">
           Your experienced corporate finance and strategic business transaction advisory team.
         </p>
       </section>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 pb-8 max-w-4xl">
+      <section className="container mx-auto px-4 pb-8 max-w-4xl space-y-6">
         {/* Calculator Card */}
         <Card className="bg-qurate-slate-light border-qurate-slate-light/30 shadow-xl">
           <CardHeader className="pb-4">
-            <CardTitle className="text-white text-2xl md:text-3xl font-semibold">
+            <CardTitle className="text-qurate-light text-2xl md:text-3xl font-semibold">
               Fee Calculator
             </CardTitle>
             <CardDescription className="text-qurate-muted text-base">
@@ -112,15 +109,28 @@ const Calculator = forwardRef<HTMLDivElement>((_, ref) => {
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-qurate-muted">
                   $
                 </span>
-                <Input id="ev-input" type="text" inputMode="numeric" placeholder="e.g. 15,000,000" value={inputValue} onChange={handleInputChange} onBlur={handleInputBlur} onFocus={handleInputFocus} className="pl-8 bg-qurate-slate border-qurate-slate-light/50 text-qurate-light placeholder:text-qurate-muted/50 focus:border-qurate-gold focus:ring-qurate-gold text-lg h-12" />
+                <Input
+                  id="ev-input"
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="e.g. 15,000,000"
+                  value={inputValue}
+                  onChange={handleInputChange}
+                  onBlur={handleInputBlur}
+                  onFocus={handleInputFocus}
+                  className="pl-8 bg-qurate-slate border-qurate-slate-light/50 text-qurate-light placeholder:text-qurate-muted/50 focus:border-qurate-gold focus:ring-qurate-gold text-lg h-12"
+                />
               </div>
-              {enterpriseValue > 0 && enterpriseValue < 2_000_000 && <p className="text-sm text-amber-400">
+              {enterpriseValue > 0 && enterpriseValue < 2_000_000 && (
+                <p className="text-sm text-qurate-warning">
                   Minimum Enterprise Value is $2,000,000
-                </p>}
+                </p>
+              )}
             </div>
 
             {/* Results Section */}
-            {feeResult && <>
+            {feeResult && (
+              <>
                 <Separator className="bg-qurate-slate-light/30" />
                 
                 <div className="space-y-4">
@@ -182,18 +192,19 @@ const Calculator = forwardRef<HTMLDivElement>((_, ref) => {
                     </div>
                   </div>
 
-                  {enterpriseValue > 50_000_000 && <p className="text-sm text-qurate-muted italic">
+                  {enterpriseValue > 50_000_000 && (
+                    <p className="text-sm text-qurate-muted italic">
                       * Fees are capped at the $50M rate for Enterprise Values above $50,000,000
-                    </p>}
+                    </p>
+                  )}
                 </div>
-              </>}
+              </>
+            )}
           </CardContent>
         </Card>
-      </main>
 
-      {/* Reference Table Section */}
-      <section className="container mx-auto px-4 pb-8 max-w-4xl">
-        <Card className="mt-8 bg-qurate-slate-light border-qurate-slate-light/30">
+        {/* Reference Table Card */}
+        <Card className="bg-qurate-slate-light border-qurate-slate-light/30">
           <CardHeader className="pb-4">
             <CardTitle className="text-qurate-light text-lg">
               Fee Structure Reference
@@ -202,7 +213,7 @@ const Calculator = forwardRef<HTMLDivElement>((_, ref) => {
               Standard fee tiers based on Enterprise Value
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
@@ -244,23 +255,7 @@ const Calculator = forwardRef<HTMLDivElement>((_, ref) => {
           </CardContent>
         </Card>
       </section>
-
-      {/* Footer */}
-      <footer className="container mx-auto px-4 pb-8 max-w-4xl text-center text-qurate-muted text-sm space-y-2">
-        <p>This is an estimate only. Final fees may vary based on engagement terms.</p>
-        <p>
-          Contact us at{' '}
-          <a href="mailto:info@qurate.com.au" className="text-qurate-gold hover:underline">
-            info@qurate.com.au
-          </a>
-        </p>
-        <p className="pt-4">
-          <a href="https://www.qurate.com.au" target="_blank" rel="noopener noreferrer" className="text-qurate-gold hover:underline">
-            www.qurate.com.au
-          </a>
-        </p>
-      </footer>
-    </div>
+    </PageShell>
   );
 });
 
