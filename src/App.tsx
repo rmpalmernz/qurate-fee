@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Calculator from "./pages/Calculator";
 import NotFound from "./pages/NotFound";
+import AdminGenerateLink from "./pages/AdminGenerateLink";
 
 const queryClient = new QueryClient();
 
@@ -17,6 +18,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Calculator />} />
           <Route path="/calculator" element={<Calculator />} />
+          <Route path="/admin/generate-link" element={<AdminGenerateLink />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
