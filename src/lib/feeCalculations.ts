@@ -1,103 +1,99 @@
-// Fee calculation logic based on Qurate's tiered fee structure
-// Success Fee = Terms Agreed + Completion Fee + Sliding Scale
-// Sliding Scale = (EV - $2M) × rate of highest tier reached
+// Fee calculation logic based on Qurate's cumulative tiered percentage structure
+// Success Fee is calculated like income tax brackets - each band taxed at its own rate
 
-interface FeeBand {
-  minEV: number;
-  maxEV: number;
-  termsAgreed: number; // Fixed fee when terms agreed
-  completionFee: number; // Fixed completion fee
-  slidingScaleRate: number; // % rate
-  slidingScaleBase: number; // baseline to subtract (matches Excel formulas)
+export interface FeeTier {
+  upTo: number;
+  rate: number;
+  label: string;
 }
 
-// Fee bands
-// IMPORTANT: Sliding Scale baseline is per your Excel formulas:
-//  - Up to $5M: (EV - 2,000,000) * 3.50%
-//  - $5M-$10M: (EV - 5,000,000) * 2.50%
-//  - $10M-$20M: (EV - 10,000,000) * 2.50%
-//  - $20M-$50M: (EV - 2,000,000) * 1.50%
-const FEE_BANDS: FeeBand[] = [
-  {
-    minEV: 2_000_000,
-    maxEV: 5_000_000,
-    termsAgreed: 20_000,
-    completionFee: 125_000,
-    slidingScaleRate: 0.035,
-    slidingScaleBase: 2_000_000,
-  },
-  {
-    minEV: 5_000_000,
-    maxEV: 10_000_000,
-    termsAgreed: 30_000,
-    completionFee: 270_000,
-    slidingScaleRate: 0.025,
-    slidingScaleBase: 5_000_000,
-  },
-  {
-    minEV: 10_000_000,
-    maxEV: 20_000_000,
-    termsAgreed: 35_000,
-    completionFee: 400_000,
-    slidingScaleRate: 0.025,
-    slidingScaleBase: 10_000_000,
-  },
-  {
-    minEV: 20_000_000,
-    maxEV: 50_000_000,
-    termsAgreed: 50_000,
-    completionFee: 600_000,
-    slidingScaleRate: 0.015,
-    slidingScaleBase: 2_000_000,
-  },
+// Cumulative fee tiers from engagement letter
+export const FEE_TIERS: FeeTier[] = [
+  { upTo: 5_000_000, rate: 0.05, label: 'First $5M' },
+  { upTo: 10_000_000, rate: 0.04, label: '$5M - $10M' },
+  { upTo: 15_000_000, rate: 0.03, label: '$10M - $15M' },
+  { upTo: 20_000_000, rate: 0.025, label: '$15M - $20M' },
+  { upTo: Infinity, rate: 0.02, label: 'Above $20M' },
 ];
 
-const MINIMUM_EV = 2_000_000;
+// Additional fee constants
+export const MONTHLY_RETAINER = 15_000;
+export const MAX_RETAINER_MONTHS = 5;
+export const RETAINER_REBATE_RATE = 0.5; // 50% rebate
+export const TRANSACTION_STRUCTURING_FEE = 35_000;
+
+export interface TierBreakdown {
+  label: string;
+  amount: number;
+  rate: number;
+  fee: number;
+}
 
 export interface FeeResult {
   enterpriseValue: number;
-  termsAgreedFee: number;
-  completionFee: number;
-  slidingScaleFee: number;
-  totalSuccessFee: number;
-  percentageOfEV: number;
+  tierBreakdown: TierBreakdown[];
+  grossSuccessFee: number;
+  retainerPaid: number;
+  retainerRebate: number;
+  netSuccessFee: number;
+  transactionStructuringFee: number;
+  effectiveRate: number;
 }
 
-export function calculateFees(enterpriseValue: number): FeeResult | null {
-  // Minimum EV is $2M
-  if (enterpriseValue < MINIMUM_EV) {
-    return null;
-  }
+/**
+ * Calculate success fee using cumulative tiered percentages
+ */
+export function calculateFees(
+  enterpriseValue: number,
+  retainerMonthsPaid: number = 0
+): FeeResult {
+  const tierBreakdown: TierBreakdown[] = [];
+  let remaining = enterpriseValue;
+  let prevCap = 0;
+  let grossSuccessFee = 0;
 
-  // Cap at $50M for fee calculation
-  const cappedEV = Math.min(enterpriseValue, 50_000_000);
+  for (const tier of FEE_TIERS) {
+    if (remaining <= 0) break;
 
-  // Find the highest tier the EV reaches
-  let applicableBand = FEE_BANDS[0];
-  for (const band of FEE_BANDS) {
-    if (cappedEV > band.minEV) {
-      applicableBand = band;
+    const tierSize = tier.upTo === Infinity ? remaining : tier.upTo - prevCap;
+    const taxableAmount = Math.min(remaining, tierSize);
+    const tierFee = taxableAmount * tier.rate;
+
+    if (taxableAmount > 0) {
+      tierBreakdown.push({
+        label: tier.label,
+        amount: taxableAmount,
+        rate: tier.rate,
+        fee: tierFee,
+      });
+      grossSuccessFee += tierFee;
     }
+
+    remaining -= taxableAmount;
+    prevCap = tier.upTo;
   }
 
-  // Fixed fees from highest tier reached
-  const termsAgreedFee = applicableBand.termsAgreed;
-  const completionFee = applicableBand.completionFee;
+  // Calculate retainer rebate
+  const cappedMonths = Math.min(retainerMonthsPaid, MAX_RETAINER_MONTHS);
+  const retainerPaid = cappedMonths * MONTHLY_RETAINER;
+  const retainerRebate = retainerPaid * RETAINER_REBATE_RATE;
 
-  // Sliding scale: (EV - baseline) × rate (baseline varies by tier, per Excel)
-  const taxableAmount = Math.max(0, cappedEV - applicableBand.slidingScaleBase);
-  const slidingScaleFee = taxableAmount * applicableBand.slidingScaleRate;
+  // Net success fee after rebate
+  const netSuccessFee = Math.max(0, grossSuccessFee - retainerRebate);
 
-  const totalSuccessFee = termsAgreedFee + completionFee + slidingScaleFee;
-  const percentageOfEV = (totalSuccessFee / enterpriseValue) * 100;
+  // Effective rate as percentage of EV
+  const effectiveRate =
+    enterpriseValue > 0 ? (netSuccessFee / enterpriseValue) * 100 : 0;
 
   return {
     enterpriseValue,
-    termsAgreedFee: Math.round(termsAgreedFee),
-    completionFee: Math.round(completionFee),
-    slidingScaleFee: Math.round(slidingScaleFee),
-    totalSuccessFee: Math.round(totalSuccessFee),
-    percentageOfEV: Math.round(percentageOfEV * 100) / 100,
+    tierBreakdown,
+    grossSuccessFee: Math.round(grossSuccessFee),
+    retainerPaid: Math.round(retainerPaid),
+    retainerRebate: Math.round(retainerRebate),
+    netSuccessFee: Math.round(netSuccessFee),
+    transactionStructuringFee: TRANSACTION_STRUCTURING_FEE,
+    effectiveRate: Math.round(effectiveRate * 100) / 100,
   };
 }
 
@@ -115,4 +111,3 @@ export function parseCurrencyInput(value: string): number {
   const cleaned = value.replace(/[^0-9.]/g, '');
   return parseFloat(cleaned) || 0;
 }
-

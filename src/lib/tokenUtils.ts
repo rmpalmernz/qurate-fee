@@ -78,6 +78,24 @@ export function validateToken(token: string | null): {
 }
 
 /**
+ * Decodes a token and returns its expiry date
+ * Used for displaying expiry in admin dashboard
+ */
+export function decodeTokenExpiry(token: string): Date | null {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 2) return null;
+    
+    const [encoded] = parts;
+    const payload = JSON.parse(atob(encoded));
+    
+    return new Date(payload.exp);
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Simple hash function for checksum
  */
 function simpleHash(str: string): string {

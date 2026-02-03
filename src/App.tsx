@@ -2,10 +2,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Calculator from "./pages/Calculator";
 import NotFound from "./pages/NotFound";
-import AdminGenerateLink from "./pages/AdminGenerateLink";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -18,7 +18,9 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Calculator />} />
           <Route path="/calculator" element={<Calculator />} />
-          <Route path="/admin/generate-link" element={<AdminGenerateLink />} />
+          <Route path="/admin" element={<Admin />} />
+          {/* Redirect old route to new admin dashboard */}
+          <Route path="/admin/generate-link" element={<Navigate to="/admin" replace />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
