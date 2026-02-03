@@ -20,32 +20,38 @@ export const FEE_TIERS: FeeTier[] = [
 export const MONTHLY_RETAINER = 15_000;
 export const MAX_RETAINER_MONTHS = 5;
 export const RETAINER_REBATE_RATE = 0.5; // 50% rebate
+export const MAX_RETAINER_REBATE = 37_500; // Maximum rebate cap per T&C
 export const REBATE_EV_THRESHOLD = 10_000_000; // Rebate only applies when EV >= $10M
 
 // Tiered Transaction Structuring Fee based on EV
+// Note: T&C uses exclusive upper bounds (e.g., $5M to $9,999,999)
+// So $10M exactly falls into the $10M-$15M tier
 export interface TSFTier {
-  upTo: number;
+  minExclusive: number; // Value must be > this (except first tier)
+  upTo: number;         // Value must be <= this
   fee: number;
   label: string;
 }
 
 export const TSF_TIERS: TSFTier[] = [
-  { upTo: 5_000_000, fee: 20_000, label: 'Under $5M' },
-  { upTo: 10_000_000, fee: 25_000, label: '$5M - $10M' },
-  { upTo: 15_000_000, fee: 30_000, label: '$10M - $15M' },
-  { upTo: 30_000_000, fee: 35_000, label: '$15M - $30M' },
-  { upTo: Infinity, fee: 50_000, label: 'Above $30M' },
+  { minExclusive: 0, upTo: 5_000_000, fee: 20_000, label: 'Up to $5M' },
+  { minExclusive: 5_000_000, upTo: 9_999_999, fee: 25_000, label: '$5M - $10M' },
+  { minExclusive: 9_999_999, upTo: 14_999_999, fee: 30_000, label: '$10M - $15M' },
+  { minExclusive: 14_999_999, upTo: 29_999_999, fee: 35_000, label: '$15M - $30M' },
+  { minExclusive: 29_999_999, upTo: Infinity, fee: 50_000, label: '$30M+' },
 ];
 
 /**
  * Get Transaction Structuring Fee based on Enterprise Value
+ * Uses T&C boundary logic: $10,000,000 exactly is in the $10M-$15M tier
  */
 export function getTransactionStructuringFee(enterpriseValue: number): number {
   for (const tier of TSF_TIERS) {
-    if (enterpriseValue <= tier.upTo) {
+    if (enterpriseValue > tier.minExclusive && enterpriseValue <= tier.upTo) {
       return tier.fee;
     }
   }
+  // Above $30M
   return TSF_TIERS[TSF_TIERS.length - 1].fee;
 }
 
@@ -101,11 +107,12 @@ export function calculateFees(
     prevCap = tier.upTo;
   }
 
-  // Calculate retainer rebate (only applies when EV >= $10M)
+  // Calculate retainer rebate (only applies when EV >= $10M, capped at $37,500)
   const cappedMonths = Math.min(retainerMonthsPaid, MAX_RETAINER_MONTHS);
   const retainerPaid = cappedMonths * MONTHLY_RETAINER;
   const rebateApplies = enterpriseValue >= REBATE_EV_THRESHOLD;
-  const retainerRebate = rebateApplies ? retainerPaid * RETAINER_REBATE_RATE : 0;
+  const uncappedRebate = rebateApplies ? retainerPaid * RETAINER_REBATE_RATE : 0;
+  const retainerRebate = Math.min(uncappedRebate, MAX_RETAINER_REBATE);
 
   // Get tiered Transaction Structuring Fee
   const transactionStructuringFee = getTransactionStructuringFee(enterpriseValue);
