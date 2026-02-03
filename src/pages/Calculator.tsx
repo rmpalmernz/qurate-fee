@@ -269,15 +269,18 @@ export default function Calculator() {
                     </div>
                   </div>
 
-                  {/* Total */}
+                  {/* Total Fees */}
                   <div className="bg-qurate-gold/10 border border-qurate-gold/30 rounded-lg p-5">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-qurate-muted text-sm uppercase tracking-wide">
-                          Net Success Fee
+                          Total Fees
                         </p>
                         <p className="text-qurate-gold text-3xl font-bold mt-1">
-                          {formatCurrency(feeResult.netSuccessFee)}
+                          {formatCurrency(feeResult.totalFees)}
+                        </p>
+                        <p className="text-xs text-qurate-muted mt-1">
+                          Success Fee + TSF - Rebate
                         </p>
                       </div>
                       <div className="text-right">

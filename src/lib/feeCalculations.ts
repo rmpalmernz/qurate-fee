@@ -69,8 +69,9 @@ export interface FeeResult {
   retainerPaid: number;
   retainerRebate: number;
   rebateApplies: boolean;
-  netSuccessFee: number;
+  netSuccessFee: number; // Gross success fee minus rebate
   transactionStructuringFee: number;
+  totalFees: number; // All fees: net success fee + TSF
   effectiveRate: number;
 }
 
@@ -120,9 +121,12 @@ export function calculateFees(
   // Net success fee after rebate
   const netSuccessFee = Math.max(0, grossSuccessFee - retainerRebate);
 
-  // Effective rate as percentage of EV
+  // Total fees = net success fee + transaction structuring fee
+  const totalFees = netSuccessFee + transactionStructuringFee;
+
+  // Effective rate as percentage of EV (based on total fees)
   const effectiveRate =
-    enterpriseValue > 0 ? (netSuccessFee / enterpriseValue) * 100 : 0;
+    enterpriseValue > 0 ? (totalFees / enterpriseValue) * 100 : 0;
 
   return {
     enterpriseValue,
@@ -133,6 +137,7 @@ export function calculateFees(
     rebateApplies,
     netSuccessFee: Math.round(netSuccessFee),
     transactionStructuringFee,
+    totalFees: Math.round(totalFees),
     effectiveRate: Math.round(effectiveRate * 100) / 100,
   };
 }
