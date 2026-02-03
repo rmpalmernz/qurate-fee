@@ -15,7 +15,7 @@ export default function PageShell({ children }: PageShellProps) {
     <div className="min-h-screen bg-qurate-slate flex flex-col">
       {/* Header */}
       <header className="border-b border-qurate-slate-light/20">
-        <div className="container mx-auto px-4 py-5 flex items-center justify-between">
+        <div className="px-6 md:px-12 py-6 md:py-8 flex items-center justify-between">
           <QurateLogo />
         </div>
       </header>
