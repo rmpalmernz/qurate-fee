@@ -121,8 +121,9 @@ export function calculateFees(
   // Net success fee after rebate
   const netSuccessFee = Math.max(0, grossSuccessFee - retainerRebate);
 
-  // Total fees = net success fee + transaction structuring fee
-  const totalFees = netSuccessFee + transactionStructuringFee;
+  // Total fees includes everything the client pays:
+  // Retainers + TSF + Gross Success Fee - Rebate at settlement
+  const totalFees = retainerPaid + transactionStructuringFee + grossSuccessFee - retainerRebate;
 
   // Effective rate as percentage of EV (based on total fees)
   const effectiveRate =

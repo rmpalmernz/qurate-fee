@@ -210,6 +210,19 @@ export default function Calculator() {
 
                   {/* Summary Cards - Restructured */}
                   <div className="grid gap-4 sm:grid-cols-2">
+                    {/* Total Retainers Paid - FIRST */}
+                    <div className="bg-qurate-slate rounded-lg p-4 border border-qurate-slate-light/20">
+                      <p className="text-qurate-muted text-sm uppercase tracking-wide">
+                        Total Retainers Paid
+                      </p>
+                      <p className="text-qurate-light text-2xl font-bold mt-1">
+                        {formatCurrency(feeResult.retainerPaid)}
+                      </p>
+                      <p className="text-xs text-qurate-muted mt-1">
+                        {retainerMonths} month{retainerMonths !== 1 ? 's' : ''} × {formatCurrency(MONTHLY_RETAINER)}
+                      </p>
+                    </div>
+
                     {/* Transaction Structuring Fee */}
                     <div className="bg-qurate-slate rounded-lg p-4 border border-qurate-slate-light/20">
                       <p className="text-qurate-muted text-sm uppercase tracking-wide">
@@ -221,16 +234,13 @@ export default function Calculator() {
                       <p className="text-xs text-qurate-muted mt-1">On term sheet execution</p>
                     </div>
 
-                    {/* Total Retainers Paid */}
+                    {/* Gross Success Fee */}
                     <div className="bg-qurate-slate rounded-lg p-4 border border-qurate-slate-light/20">
                       <p className="text-qurate-muted text-sm uppercase tracking-wide">
-                        Total Retainers Paid
+                        Gross Success Fee
                       </p>
                       <p className="text-qurate-light text-2xl font-bold mt-1">
-                        {formatCurrency(feeResult.retainerPaid)}
-                      </p>
-                      <p className="text-xs text-qurate-muted mt-1">
-                        {retainerMonths} month{retainerMonths !== 1 ? 's' : ''} × {formatCurrency(MONTHLY_RETAINER)}
+                        {formatCurrency(feeResult.grossSuccessFee)}
                       </p>
                     </div>
 
@@ -246,16 +256,6 @@ export default function Calculator() {
                         <p className="text-xs text-qurate-muted mt-1">50% of retainers credited</p>
                       </div>
                     )}
-
-                    {/* Gross Success Fee */}
-                    <div className="bg-qurate-slate rounded-lg p-4 border border-qurate-slate-light/20">
-                      <p className="text-qurate-muted text-sm uppercase tracking-wide">
-                        Gross Success Fee
-                      </p>
-                      <p className="text-qurate-light text-2xl font-bold mt-1">
-                        {formatCurrency(feeResult.grossSuccessFee)}
-                      </p>
-                    </div>
                   </div>
 
                   {/* Total Fees */}
@@ -269,7 +269,7 @@ export default function Calculator() {
                           {formatCurrency(feeResult.totalFees)}
                         </p>
                         <p className="text-xs text-qurate-muted mt-1">
-                          Success Fee + TSF - Rebate
+                          Retainers + TSF + Success Fee - Rebate
                         </p>
                       </div>
                       <div className="text-right">
