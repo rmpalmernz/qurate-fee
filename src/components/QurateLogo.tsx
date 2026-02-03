@@ -18,7 +18,7 @@ const QurateLogo = forwardRef<HTMLAnchorElement, QurateLogoProps>(
         <img
           src={qurateLogo}
           alt="Qurate Advisory"
-          className={`h-12 w-auto ${className}`}
+          className={`h-14 md:h-16 w-auto ${className}`}
         />
       </a>
     );
