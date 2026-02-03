@@ -86,9 +86,7 @@ export default function Calculator() {
       {/* Hero Section with Strapline */}
       <section className="container mx-auto px-4 py-12 max-w-4xl">
         <h1 className="text-qurate-light text-2xl md:text-3xl lg:text-4xl font-bold leading-tight mb-6">
-          Business advice you<br />
-          can count on.<br />
-          People you can trust.
+          Business advice you can count on. People you can trust.
         </h1>
         <p className="text-qurate-muted text-base sm:text-lg md:text-xl font-light">
           Your experienced corporate finance and strategic business transaction advisory team.
