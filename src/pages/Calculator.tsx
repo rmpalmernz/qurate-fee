@@ -123,43 +123,9 @@ export default function Calculator() {
                 <Separator className="bg-qurate-slate-light/30" />
 
                 <div className="space-y-4">
-                  <h3 className="text-qurate-light font-semibold text-lg">
-                    Success Fee Breakdown
-                  </h3>
-
-                  {/* Tier Breakdown Table */}
-                  <div className="rounded-lg border border-qurate-slate-light/20 overflow-hidden">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="border-qurate-slate-light/30 hover:bg-transparent">
-                          <TableHead className="text-qurate-muted">Tier</TableHead>
-                          <TableHead className="text-qurate-muted text-right">Amount</TableHead>
-                          <TableHead className="text-qurate-muted text-right">Rate</TableHead>
-                          <TableHead className="text-qurate-muted text-right">Fee</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {feeResult.tierBreakdown.map((tier, idx) => <TableRow key={idx} className="border-qurate-slate-light/20 hover:bg-qurate-slate/50">
-                            <TableCell className="text-qurate-light font-medium">
-                              {tier.label}
-                            </TableCell>
-                            <TableCell className="text-qurate-light text-right">
-                              {formatCurrency(tier.amount)}
-                            </TableCell>
-                            <TableCell className="text-qurate-gold text-right font-semibold">
-                              {(tier.rate * 100).toFixed(1)}%
-                            </TableCell>
-                            <TableCell className="text-qurate-light text-right">
-                              {formatCurrency(tier.fee)}
-                            </TableCell>
-                          </TableRow>)}
-                      </TableBody>
-                    </Table>
-                  </div>
-
-                  {/* Summary Cards - Restructured */}
+                  {/* Summary Cards - Above Breakdown */}
                   <div className="grid gap-4 sm:grid-cols-2">
-                    {/* Total Retainers Paid - FIRST */}
+                    {/* Total Retainers Paid */}
                     <div className="bg-qurate-slate rounded-lg p-4 border border-qurate-slate-light/20">
                       <p className="text-qurate-muted text-sm uppercase tracking-wide">
                         Total Retainers Paid
@@ -228,6 +194,41 @@ export default function Calculator() {
                         </p>
                       </div>
                     </div>
+                  </div>
+
+                  {/* Success Fee Breakdown - Now below summary */}
+                  <h3 className="text-qurate-light font-semibold text-lg pt-2">
+                    Success Fee Breakdown
+                  </h3>
+
+                  {/* Tier Breakdown Table */}
+                  <div className="rounded-lg border border-qurate-slate-light/20 overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="border-qurate-slate-light/30 hover:bg-transparent">
+                          <TableHead className="text-qurate-muted">Tier</TableHead>
+                          <TableHead className="text-qurate-muted text-right">Amount</TableHead>
+                          <TableHead className="text-qurate-muted text-right">Rate</TableHead>
+                          <TableHead className="text-qurate-muted text-right">Fee</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {feeResult.tierBreakdown.map((tier, idx) => <TableRow key={idx} className="border-qurate-slate-light/20 hover:bg-qurate-slate/50">
+                            <TableCell className="text-qurate-light font-medium">
+                              {tier.label}
+                            </TableCell>
+                            <TableCell className="text-qurate-light text-right">
+                              {formatCurrency(tier.amount)}
+                            </TableCell>
+                            <TableCell className="text-qurate-gold text-right font-semibold">
+                              {(tier.rate * 100).toFixed(1)}%
+                            </TableCell>
+                            <TableCell className="text-qurate-light text-right">
+                              {formatCurrency(tier.fee)}
+                            </TableCell>
+                          </TableRow>)}
+                      </TableBody>
+                    </Table>
                   </div>
                 </div>
               </>}
