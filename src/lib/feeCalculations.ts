@@ -17,11 +17,23 @@ export const FEE_TIERS: FeeTier[] = [
 ];
 
 // Additional fee constants
-export const MONTHLY_RETAINER = 15_000;
-export const MAX_RETAINER_MONTHS = 5;
+export const MONTHLY_RETAINER_STANDARD = 15_000; // For EV >= $5M
+export const MONTHLY_RETAINER_REDUCED = 10_000; // For EV < $5M
+export const RETAINER_EV_THRESHOLD = 5_000_000; // Threshold for retainer amount
+export const MIN_RETAINER_MONTHS = 3;
+export const MAX_RETAINER_MONTHS = 6;
 export const RETAINER_REBATE_RATE = 0.5; // 50% rebate
 export const MAX_RETAINER_REBATE = 37_500; // Maximum rebate cap per T&C
 export const REBATE_EV_THRESHOLD = 10_000_000; // Rebate only applies when EV >= $10M
+
+/**
+ * Get monthly retainer amount based on Enterprise Value
+ */
+export function getMonthlyRetainer(enterpriseValue: number): number {
+  return enterpriseValue < RETAINER_EV_THRESHOLD 
+    ? MONTHLY_RETAINER_REDUCED 
+    : MONTHLY_RETAINER_STANDARD;
+}
 
 // Tiered Transaction Structuring Fee based on EV
 // Note: T&C uses exclusive upper bounds (e.g., $5M to $9,999,999)
@@ -109,8 +121,9 @@ export function calculateFees(
   }
 
   // Calculate retainer rebate (only applies when EV >= $10M, capped at $37,500)
-  const cappedMonths = Math.min(retainerMonthsPaid, MAX_RETAINER_MONTHS);
-  const retainerPaid = cappedMonths * MONTHLY_RETAINER;
+  const cappedMonths = Math.min(Math.max(retainerMonthsPaid, MIN_RETAINER_MONTHS), MAX_RETAINER_MONTHS);
+  const monthlyRetainer = getMonthlyRetainer(enterpriseValue);
+  const retainerPaid = cappedMonths * monthlyRetainer;
   const rebateApplies = enterpriseValue >= REBATE_EV_THRESHOLD;
   const uncappedRebate = rebateApplies ? retainerPaid * RETAINER_REBATE_RATE : 0;
   const retainerRebate = Math.min(uncappedRebate, MAX_RETAINER_REBATE);
