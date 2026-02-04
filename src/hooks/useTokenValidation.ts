@@ -10,6 +10,7 @@ export interface RecipientInfo {
     name: string;
     industry: string;
   } | null;
+  expiresAt: Date | null;
 }
 
 export interface TokenValidationResult {
@@ -44,6 +45,7 @@ export function useTokenValidation(
         recipientName: 'Development User',
         recipientEmail: null,
         company: null,
+        expiresAt: null, // No expiry in dev mode
       });
       return;
     }
@@ -79,6 +81,7 @@ export function useTokenValidation(
             name: data.company.name || '',
             industry: data.company.industry || '',
           } : null,
+          expiresAt: data.expires_at ? new Date(data.expires_at) : null,
         });
         setError(null);
       } else {

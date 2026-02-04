@@ -356,6 +356,17 @@ export default function Calculator() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Token validity footer */}
+        {recipient?.expiresAt && (
+          <div className="text-center text-xs text-qurate-muted">
+            This link expires on {recipient.expiresAt.toLocaleDateString('en-AU', { 
+              day: 'numeric', 
+              month: 'long', 
+              year: 'numeric' 
+            })}
+          </div>
+        )}
       </section>
     </PageShell>
   );
