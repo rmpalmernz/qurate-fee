@@ -1,115 +1,34 @@
-// Self-contained token utilities for access control
-// Tokens encode the expiry date within them (no database needed)
-
-const TOKEN_SECRET = 'qurate-fee-calc-2024'; // Simple obfuscation key
+// Token utilities for access control
+// Token validation is now handled by the QVOS backend
+// This file is kept for reference and potential admin-side token generation
 
 /**
- * Generates a self-contained access token with embedded expiry
- * Copy this function to your Qurate admin app to generate client tokens
- * 
- * @param daysValid - Number of days the token should be valid (default: 30)
- * @returns Base64 encoded token string
+ * Helper to extract token from URL
+ * Used by the useTokenValidation hook
  */
-export function generateToken(daysValid: number = 30): string {
-  const expiryDate = new Date();
-  expiryDate.setDate(expiryDate.getDate() + daysValid);
-  
-  const payload = {
-    exp: expiryDate.getTime(),
-    iat: Date.now(),
-    key: TOKEN_SECRET,
-  };
-  
-  // Encode payload as base64
-  const encoded = btoa(JSON.stringify(payload));
-  
-  // Add a simple checksum for basic integrity
-  const checksum = simpleHash(encoded);
-  
-  return `${encoded}.${checksum}`;
+export function getTokenFromURL(): string | null {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('token');
 }
 
 /**
- * Validates an access token and checks if it's expired
+ * @deprecated Token validation is now handled by the QVOS backend.
+ * Use the useTokenValidation hook instead.
  * 
- * @param token - The token string from URL parameter
- * @returns Object with valid flag and optional error message
+ * This function is kept for backwards compatibility and will be removed
+ * in a future version.
  */
 export function validateToken(token: string | null): { 
   valid: boolean; 
   error?: string;
   expiresAt?: Date;
 } {
+  console.warn('validateToken is deprecated. Token validation is now handled by the QVOS backend.');
+  
   if (!token) {
     return { valid: false, error: 'No access token provided' };
   }
-
-  try {
-    const parts = token.split('.');
-    if (parts.length !== 2) {
-      return { valid: false, error: 'Invalid token format' };
-    }
-
-    const [encoded, checksum] = parts;
-    
-    // Verify checksum
-    if (simpleHash(encoded) !== checksum) {
-      return { valid: false, error: 'Token integrity check failed' };
-    }
-
-    // Decode payload
-    const payload = JSON.parse(atob(encoded));
-    
-    // Verify secret key
-    if (payload.key !== TOKEN_SECRET) {
-      return { valid: false, error: 'Invalid token' };
-    }
-
-    // Check expiry
-    const expiryDate = new Date(payload.exp);
-    if (Date.now() > payload.exp) {
-      return { valid: false, error: 'Token has expired' };
-    }
-
-    return { valid: true, expiresAt: expiryDate };
-  } catch {
-    return { valid: false, error: 'Invalid token' };
-  }
-}
-
-/**
- * Decodes a token and returns its expiry date
- * Used for displaying expiry in admin dashboard
- */
-export function decodeTokenExpiry(token: string): Date | null {
-  try {
-    const parts = token.split('.');
-    if (parts.length !== 2) return null;
-    
-    const [encoded] = parts;
-    const payload = JSON.parse(atob(encoded));
-    
-    return new Date(payload.exp);
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Simple hash function for checksum
- */
-function simpleHash(str: string): string {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
-  }
-  return Math.abs(hash).toString(36);
-}
-
-// Helper to extract token from URL
-export function getTokenFromURL(): string | null {
-  const params = new URLSearchParams(window.location.search);
-  return params.get('token');
+  
+  // All token validation now happens server-side
+  return { valid: false, error: 'Client-side validation deprecated' };
 }

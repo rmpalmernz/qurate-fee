@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { validateToken } from '@/lib/tokenUtils';
+import { useTokenValidation } from '@/hooks/useTokenValidation';
 import {
   calculateFees,
   formatCurrency,
@@ -25,28 +25,16 @@ const RETAINER_MONTH_OPTIONS = [3, 4, 5, 6] as const;
 
 export default function Calculator() {
   const [searchParams] = useSearchParams();
-  const [isValidating, setIsValidating] = useState(true);
-  const [tokenError, setTokenError] = useState<string | null>(null);
   const [inputValue, setInputValue] = useState('');
   const [enterpriseValue, setEnterpriseValue] = useState(0);
   const [retainerMonths, setRetainerMonths] = useState(MIN_RETAINER_MONTHS);
 
-  // Extract params once to avoid re-validation on unrelated param changes
+  // Extract params once
   const token = searchParams.get('token');
   const devMode = searchParams.get('dev') === 'true';
 
-  // Validate token on mount (bypass in dev mode with ?dev=true)
-  useEffect(() => {
-    if (devMode) {
-      setIsValidating(false);
-      return;
-    }
-    const result = validateToken(token);
-    if (!result.valid) {
-      setTokenError(result.error || 'Invalid access');
-    }
-    setIsValidating(false);
-  }, [token, devMode]);
+  // Validate token against QVOS backend
+  const { isLoading, isValid, error, recipient } = useTokenValidation(token, devMode);
 
   // Calculate fees when enterprise value changes
   const feeResult = useMemo(() => {
@@ -93,22 +81,34 @@ export default function Calculator() {
     setRetainerMonths(parseInt(val, 10));
   }, []);
 
-  if (isValidating) {
+  // Loading state
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-qurate-slate flex items-center justify-center">
-        <div className="text-qurate-light animate-pulse">Validating access...</div>
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-qurate-gold border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <div className="text-qurate-light animate-pulse">Validating access...</div>
+        </div>
       </div>
     );
   }
 
-  if (tokenError) {
-    return <AccessDenied error={tokenError} />;
+  // Access denied
+  if (!isValid) {
+    return <AccessDenied error={error || undefined} />;
   }
 
   return (
     <PageShell>
       {/* Hero Section with Strapline */}
       <section className="container mx-auto px-4 py-12 max-w-4xl">
+        {/* Welcome message if recipient name available */}
+        {recipient?.recipientName && (
+          <p className="text-qurate-gold text-sm font-medium mb-2">
+            Welcome, {recipient.recipientName}
+            {recipient.company?.name && ` • ${recipient.company.name}`}
+          </p>
+        )}
         <h1 className="text-qurate-light text-2xl md:text-3xl lg:text-4xl font-bold leading-tight mb-6">
           Business advice you can count on. People you can trust.
         </h1>
