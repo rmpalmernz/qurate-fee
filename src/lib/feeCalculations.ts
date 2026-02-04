@@ -30,6 +30,7 @@ export const REBATE_EV_THRESHOLD = 10_000_000; // Rebate only applies when EV >=
  * Get monthly retainer amount based on Enterprise Value
  */
 export function getMonthlyRetainer(enterpriseValue: number): number {
+  if (enterpriseValue <= 0) return 0;
   return enterpriseValue < RETAINER_EV_THRESHOLD 
     ? MONTHLY_RETAINER_REDUCED 
     : MONTHLY_RETAINER_STANDARD;
