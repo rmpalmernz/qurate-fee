@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { validateToken } from '@/lib/tokenUtils';
+import { useTokenValidation } from '@/hooks/useTokenValidation';
 import { calculateFees, formatCurrency, parseCurrencyInput, FEE_TIERS, getMonthlyRetainer, MIN_RETAINER_MONTHS, MAX_RETAINER_MONTHS, REBATE_EV_THRESHOLD } from '@/lib/feeCalculations';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,28 +10,20 @@ import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import PageShell from '@/components/layout/PageShell';
 import AccessDenied from './AccessDenied';
+import { useState } from 'react';
+
 export default function Calculator() {
   const [searchParams] = useSearchParams();
-  const [isValidating, setIsValidating] = useState(true);
-  const [tokenError, setTokenError] = useState<string | null>(null);
   const [inputValue, setInputValue] = useState('');
   const [enterpriseValue, setEnterpriseValue] = useState(0);
   const [retainerMonths, setRetainerMonths] = useState(MIN_RETAINER_MONTHS);
 
-  // Validate token on mount (bypass in dev mode with ?dev=true)
-  useEffect(() => {
-    const token = searchParams.get('token');
-    const devMode = searchParams.get('dev') === 'true';
-    if (devMode) {
-      setIsValidating(false);
-      return;
-    }
-    const result = validateToken(token);
-    if (!result.valid) {
-      setTokenError(result.error || 'Invalid access');
-    }
-    setIsValidating(false);
-  }, [searchParams]);
+  // Get token and dev mode from URL
+  const token = searchParams.get('token');
+  const devMode = searchParams.get('dev') === 'true';
+
+  // Validate token using the API hook
+  const { isLoading, isValid, error: tokenError, recipient } = useTokenValidation(token, devMode);
 
   // Calculate fees when enterprise value changes
   const feeResult = useMemo(() => {
@@ -56,13 +48,13 @@ export default function Calculator() {
       setInputValue(enterpriseValue.toString());
     }
   };
-  if (isValidating) {
+  if (isLoading) {
     return <div className="min-h-screen bg-qurate-slate flex items-center justify-center">
         <div className="text-qurate-light animate-pulse">Validating access...</div>
       </div>;
   }
-  if (tokenError) {
-    return <AccessDenied error={tokenError} />;
+  if (!isValid) {
+    return <AccessDenied error={tokenError || 'Invalid access'} />;
   }
   return <PageShell>
       {/* Hero Section with Strapline */}
