@@ -6,7 +6,8 @@ import {
   formatCurrency,
   parseCurrencyInput,
   FEE_TIERS,
-  MONTHLY_RETAINER,
+  getMonthlyRetainer,
+  MIN_RETAINER_MONTHS,
   MAX_RETAINER_MONTHS,
   REBATE_EV_THRESHOLD,
 } from '@/lib/feeCalculations';
@@ -25,7 +26,7 @@ export default function Calculator() {
   const [tokenError, setTokenError] = useState<string | null>(null);
   const [inputValue, setInputValue] = useState('');
   const [enterpriseValue, setEnterpriseValue] = useState(0);
-  const [retainerMonths, setRetainerMonths] = useState(0);
+  const [retainerMonths, setRetainerMonths] = useState(MIN_RETAINER_MONTHS);
 
   // Validate token on mount (bypass in dev mode with ?dev=true)
   useEffect(() => {
@@ -146,19 +147,22 @@ export default function Calculator() {
                     <SelectValue placeholder="Select months" />
                   </SelectTrigger>
                   <SelectContent className="bg-qurate-slate border-qurate-slate-light/50">
-                    {[0, 1, 2, 3, 4, 5].map((m) => (
-                      <SelectItem
-                        key={m}
-                        value={m.toString()}
-                        className="text-qurate-light focus:bg-qurate-slate-light"
-                      >
-                        {m} month{m !== 1 ? 's' : ''} ({formatCurrency(m * MONTHLY_RETAINER)})
-                      </SelectItem>
-                    ))}
+                    {[3, 4, 5, 6].map((m) => {
+                      const monthlyRate = getMonthlyRetainer(enterpriseValue);
+                      return (
+                        <SelectItem
+                          key={m}
+                          value={m.toString()}
+                          className="text-qurate-light focus:bg-qurate-slate-light"
+                        >
+                          {m} months ({formatCurrency(m * monthlyRate)})
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-qurate-muted">
-                  50% of retainers credited against Success Fee
+                  {enterpriseValue < 5_000_000 ? '$10k' : '$15k'}/mo • 50% credited against Success Fee
                 </p>
               </div>
             </div>
@@ -219,7 +223,7 @@ export default function Calculator() {
                         {formatCurrency(feeResult.retainerPaid)}
                       </p>
                       <p className="text-xs text-qurate-muted mt-1">
-                        {retainerMonths} month{retainerMonths !== 1 ? 's' : ''} × {formatCurrency(MONTHLY_RETAINER)}
+                        {retainerMonths} months × {formatCurrency(getMonthlyRetainer(enterpriseValue))}
                       </p>
                     </div>
 
@@ -324,8 +328,7 @@ export default function Calculator() {
             </div>
             <div className="p-4 border-t border-qurate-slate-light/20">
               <p className="text-sm text-qurate-muted">
-              <strong>Monthly Retainer:</strong> {formatCurrency(MONTHLY_RETAINER)}/month (max{' '}
-                {MAX_RETAINER_MONTHS} months) — 50% credited against Success Fee when EV ≥ {formatCurrency(REBATE_EV_THRESHOLD)}
+              <strong>Monthly Retainer:</strong> $10k (EV &lt; $5M) or $15k (EV ≥ $5M) • {MIN_RETAINER_MONTHS}-{MAX_RETAINER_MONTHS} months — 50% credited against Success Fee when EV ≥ {formatCurrency(REBATE_EV_THRESHOLD)}
               </p>
               <p className="text-sm text-qurate-muted mt-1">
                 <strong>Transaction Structuring Fee:</strong> Tiered by EV ($20k–$50k) — payable on term sheet execution
