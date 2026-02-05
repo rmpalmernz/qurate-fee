@@ -164,7 +164,7 @@ export default function Calculator() {
                         <p className="text-qurate-muted text-sm uppercase tracking-wide">
                           Retainer Rebate
                         </p>
-                        <p className="text-green-400 text-2xl font-bold mt-1">
+                       <p className="text-qurate-success text-2xl font-bold mt-1">
                           -{formatCurrency(feeResult.retainerRebate)}
                         </p>
                         <p className="text-xs text-qurate-muted mt-1">50% of retainers credited</p>

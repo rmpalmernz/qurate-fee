@@ -67,6 +67,7 @@ export default {
           muted: "hsl(var(--qurate-muted))",
           warning: "hsl(var(--qurate-warning))",
           error: "hsl(var(--qurate-error))",
+         success: "hsl(var(--qurate-success))",
         },
       },
       borderRadius: {
