@@ -5,12 +5,15 @@ import { calculateFees, formatCurrency, parseCurrencyInput, FEE_TIERS, getMonthl
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import PageShell from '@/components/layout/PageShell';
 import AccessDenied from './AccessDenied';
 import { useState } from 'react';
+import { generateFeePDF } from '@/lib/pdfExport';
+import { Download } from 'lucide-react';
 
 export default function Calculator() {
   const [searchParams] = useSearchParams();
@@ -193,6 +196,15 @@ export default function Calculator() {
                           {feeResult.effectiveRate.toFixed(2)}%
                         </p>
                       </div>
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-qurate-gold/20">
+                      <Button
+                        onClick={() => generateFeePDF(feeResult, retainerMonths)}
+                        className="w-full sm:w-auto bg-qurate-gold hover:bg-qurate-gold-light text-qurate-slate font-semibold"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Download PDF
+                      </Button>
                     </div>
                   </div>
 
